@@ -7,7 +7,7 @@ export default function Home() {
       <div className="flex flex-col md:flex-row gap-8">
         <Link
           href="/assignment-1"
-          className="group shadow-md flex items-center gap-4 px-8 py-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg hover:scale-105 transition-all duration-300 hover:bg-white/20"
+          className="group flex items-center gap-4 px-8 py-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg hover:scale-105 transition-all duration-300 hover:bg-white/20"
         >
           <Gamepad className="w-8 h-8 text-yellow-300 group-hover:scale-110 transition-transform" />
           <span className="text-xl font-semibold">Tic-Tac-Toe Game</span>
@@ -15,7 +15,7 @@ export default function Home() {
 
         <Link
           href="/assignment-2"
-          className="group shadow-md flex items-center gap-4 px-8 py-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg hover:scale-105 transition-all duration-300 hover:bg-white/20"
+          className="group flex items-center gap-4 px-8 py-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg hover:scale-105 transition-all duration-300 hover:bg-white/20"
         >
           <PackageCheck className="w-8 h-8 text-green-300 group-hover:scale-110 transition-transform" />
           <span className="text-xl font-semibold">CRUD Product App</span>

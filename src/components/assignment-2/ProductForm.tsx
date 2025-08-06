@@ -112,39 +112,16 @@ const validateForm = () => {
     newErrors.description = 'Description is required';
   }
 
-  // Image Validation
-  const allowedImageDomains = [
-    'i.imgur.com',
-    'placehold.co',
-    'source.boomplaymusic.com',
-    'deadline.com',
-    'encrypted-tbn0.gstatic.com',
-    't3.ftcdn.net',
-    'api.escuelajs.co',
-  ];
-
+  // Image Validation (only checks for non-empty URLs now)
   if (formData.images.length === 0 || formData.images.some((img) => !img.trim())) {
     newErrors.images = 'Image URL is required';
-  } else {
-    const invalidImage = formData.images.find((url) => {
-      try {
-        const domain = new URL(url).hostname;
-        return !allowedImageDomains.includes(domain);
-      } catch {
-        return true; // Malformed URL
-      }
-    });
-
-    if (invalidImage) {
-      newErrors.images =
-        'One or more image URLs are invalid or not from an allowed domain.';
-    }
   }
 
   // Set and return errors
   setErrors(newErrors);
   return Object.keys(newErrors).length === 0;
 };
+
 
 
   const handleSubmit = async (e: React.FormEvent) => {
