@@ -1,21 +1,24 @@
 import Link from 'next/link';
+import { Gamepad, PackageCheck } from 'lucide-react';
 
 export default function Home() {
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h1 className="text-4xl font-bold mb-8 text-center">Next.js Assignments</h1>
-      <div className="flex flex-col md:flex-row gap-4">
+    <main className="flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-to-br text-black">
+      <div className="flex flex-col md:flex-row gap-8">
         <Link
           href="/assignment-1"
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center"
+          className="group shadow-md flex items-center gap-4 px-8 py-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg hover:scale-105 transition-all duration-300 hover:bg-white/20"
         >
-          Assignment-1: Tic-Tac-Toe Game
+          <Gamepad className="w-8 h-8 text-yellow-300 group-hover:scale-110 transition-transform" />
+          <span className="text-xl font-semibold">Tic-Tac-Toe Game</span>
         </Link>
+
         <Link
           href="/assignment-2"
-          className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center"
+          className="group shadow-md flex items-center gap-4 px-8 py-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg hover:scale-105 transition-all duration-300 hover:bg-white/20"
         >
-          Assignment-2: CRUD Product App
+          <PackageCheck className="w-8 h-8 text-green-300 group-hover:scale-110 transition-transform" />
+          <span className="text-xl font-semibold">CRUD Product App</span>
         </Link>
       </div>
     </main>

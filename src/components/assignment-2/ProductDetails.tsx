@@ -37,6 +37,7 @@ export default function ProductDetails({ id }: { id: number }) {
                   className="w-full h-48 object-cover rounded-md"
                   width={500}
                   height={300}
+                  unoptimized
                 />
               ))}
             </div>

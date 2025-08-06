@@ -129,6 +129,7 @@ function getValidImage(images: (string | undefined)[] | undefined): string {
                         alt="Product image"
                         width={80}
                         height={80}
+                        unoptimized
                       />
                     </td>
                     <td className="px-4 py-2">

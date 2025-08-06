@@ -4,6 +4,9 @@ import { useAppSelector } from '@/lib/store';
 
 export default function LeaderboardTable() {
   const { players } = useAppSelector((state) => state.ticTacToe);
+  const totalScore = players.reduce((accumulator, currentObject) => {
+    return accumulator + currentObject.score;
+  }, 0);
 
   return (
     <div className="overflow-hidden rounded-2xl shadow-xl border border-gray-100">
@@ -18,6 +21,9 @@ export default function LeaderboardTable() {
             </th>
             <th className="px-6 py-4 text-right text-xs font-semibold text-white uppercase tracking-wider">
               Lost
+            </th>
+            <th className="px-6 py-4 text-right text-xs font-semibold text-white uppercase tracking-wider">
+              Draw
             </th>
             <th className="px-6 py-4 text-right text-xs font-semibold text-white uppercase tracking-wider">
               Score
@@ -35,7 +41,7 @@ export default function LeaderboardTable() {
                 <div className="flex items-center">
                   <div className="ml-4">
                     {player.name && <div className="text-sm font-medium text-gray-900">
-                      {player.name} <span className='rounded-full bg-purple-300 py-2 px-3'>{player.symbol}</span>
+                      {player.name} <span className='rounded-full bg-purple-300 py-1 px-2'>{player.symbol}</span>
                     </div>}
                   </div>
                 </div>
@@ -47,7 +53,12 @@ export default function LeaderboardTable() {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right">
                 <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-gradient-to-r bg-red-300`}>
-                  {player.score ? 5 - player.score : 0}
+                  {player.score ? 5 - (player.score + 5 - totalScore) : 0}
+                </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right">
+                <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-gradient-to-r bg-red-300`}>
+                  {5 - totalScore}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right">

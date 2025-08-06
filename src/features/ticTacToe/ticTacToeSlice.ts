@@ -61,7 +61,6 @@ makeMove: (state, action: PayloadAction<number>) => {
   }
 
   if (checkDraw(state.board)) {
-    console.log('Round is a draw');
     state.roundWinners.push(null);
 
     if (state.round === 5) {
@@ -75,7 +74,6 @@ makeMove: (state, action: PayloadAction<number>) => {
 
   // Switch turn
   state.currentPlayer = currentPlayerAtMove === 'X' ? 'O' : 'X';
-  console.log(`Next turn: ${state.currentPlayer}`);
 },
 
 

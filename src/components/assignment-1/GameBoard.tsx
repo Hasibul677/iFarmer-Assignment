@@ -20,7 +20,6 @@ export default function GameBoard() {
   const currentPlayerName = players.find(p => p.symbol === currentPlayer)?.name;
 
   const handleCellClick = (index: number) => {
-    console.log("playing", index)
     if (gameStatus === 'playing') {
       dispatch(makeMove(index));
     }
