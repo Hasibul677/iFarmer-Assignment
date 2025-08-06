@@ -1,22 +1,27 @@
-export type Product = {
+export interface Category {
+  id: number;
+  name: string;
+  image: string;
+  creationAt?: string;
+  updatedAt?: string;
+}
+
+export interface Product {
   id: number;
   title: string;
   price: number;
   description: string;
-  category: {
-    id: number;
-    name: string;
-  };
+  category: Category;
   images: string[];
-};
+}
 
-export type ProductsState = {
+export interface ProductsState {
   products: Product[];
   loading: boolean;
   error: string | null;
-  categories: string[];
+  categories: Category[];
   searchTerm: string;
-  selectedCategory: string | null;
+  selectedCategory: Category | null;
   currentPage: number;
   itemsPerPage: number;
-};
+}

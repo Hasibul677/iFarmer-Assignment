@@ -2,15 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/store';
-import { 
-  fetchProducts, 
-  fetchCategories, 
+import {
+  fetchProducts,
+  fetchCategories,
   deleteProduct,
   setSearchTerm,
   setSelectedCategory,
   setCurrentPage
 } from '@/features/products/productsSlice';
 import Link from 'next/link';
+import { Category } from '@/features/products/types';
+import Image from 'next/image';
+import { Pencil, Trash2 } from 'lucide-react';
 
 export default function ProductList() {
   const dispatch = useAppDispatch();
@@ -35,7 +38,7 @@ export default function ProductList() {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || product.category.name === selectedCategory;
+    const matchesCategory = !selectedCategory || product.category.id === selectedCategory.id;
     return matchesSearch && matchesCategory;
   });
 
@@ -49,7 +52,7 @@ export default function ProductList() {
     dispatch(setSearchTerm(e.target.value));
   };
 
-  const handleCategoryChange = (category: string | null) => {
+  const handleCategoryChange = (category: Category | null) => {
     dispatch(setSelectedCategory(category));
   };
 
@@ -69,6 +72,14 @@ export default function ProductList() {
       setProductToDelete(null);
     }
   };
+
+function getValidImage(images: (string | undefined)[] | undefined): string {
+  const valid = images?.find(img => 
+    img && (img.startsWith('http') || img.startsWith('/'))
+  );
+  return valid || "/sale.avif";
+}
+
 
   if (loading) return <div className="text-center py-8">Loading...</div>;
   if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
@@ -101,7 +112,7 @@ export default function ProductList() {
             <table className="min-w-full bg-white rounded-lg overflow-hidden">
               <thead className="bg-gray-800 text-white">
                 <tr>
-                  <th className="px-4 py-2">ID</th>
+                  <th className="px-4 py-2">Image</th>
                   <th className="px-4 py-2">Name</th>
                   <th className="px-4 py-2">Category</th>
                   <th className="px-4 py-2">Price</th>
@@ -111,9 +122,17 @@ export default function ProductList() {
               <tbody className="text-gray-700">
                 {paginatedProducts.map((product) => (
                   <tr key={product.id} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="px-4 py-2">{product.id}</td>
                     <td className="px-4 py-2">
-                      <Link 
+                      <Image
+                        key={product.id}
+                        src={getValidImage(product.images)}
+                        alt="Product image"
+                        width={80}
+                        height={80}
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <Link
                         href={`/assignment-2/products/${product.id}`}
                         className="text-blue-600 hover:underline"
                       >
@@ -123,21 +142,23 @@ export default function ProductList() {
                     <td className="px-4 py-2">{product.category.name}</td>
                     <td className="px-4 py-2">${product.price}</td>
                     <td className="px-4 py-2">
-                      <div className="flex space-x-2">
-                        <Link
-                          href={`/assignment-2/edit/${product.id}`}
-                          className="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          onClick={() => confirmDelete(product.id)}
-                          className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
+  <div className="flex space-x-2 justify-center">
+    <Link
+      href={`/assignment-2/edit/${product.id}`}
+      className="p-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+      title="Edit"
+    >
+      <Pencil size={18} />
+    </Link>
+    <button
+      onClick={() => confirmDelete(product.id)}
+      className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+      title="Delete"
+    >
+      <Trash2 size={18} />
+    </button>
+  </div>
+</td>
                   </tr>
                 ))}
               </tbody>
@@ -176,12 +197,17 @@ export default function ProductList() {
                 </button>
               </li>
               {categories.map((category) => (
-                <li key={category}>
+                <li key={category.id}>
                   <button
-                    onClick={() => handleCategoryChange(category)}
-                    className={`w-full text-left px-2 py-1 rounded ${selectedCategory === category ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'}`}
+                    onClick={() => handleCategoryChange(
+                      selectedCategory?.id === category.id ? null : category
+                    )}
+                    className={`w-full text-left px-2 py-1 rounded ${selectedCategory?.id === category.id
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'hover:bg-gray-100'
+                      }`}
                   >
-                    {category}
+                    {category.name}
                   </button>
                 </li>
               ))}

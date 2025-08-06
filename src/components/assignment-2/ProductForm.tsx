@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/lib/store';
-import { 
-  addNewProduct, 
+import {
+  addNewProduct,
   updateExistingProduct,
   fetchCategories
 } from '@/features/products/productsSlice';
@@ -23,7 +23,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     title: '',
     price: 0,
     description: '',
-    category: { id: 1, name: categories[0] || '' },
+    category: { id: 0, name: '', image: '', creationAt: '', updatedAt: '' },
     images: [''],
   });
 
@@ -40,14 +40,28 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     }
   }, [initialData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    if (!initialData && categories.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        category: categories[0],
+      }));
+    }
+  }, [categories, initialData]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    
+
     if (name === 'category') {
-      setFormData({
-        ...formData,
-        category: { id: categories.indexOf(value) + 1, name: value },
-      });
+      const selectedCategory = categories.find((cat) => cat.id === Number(value));
+      if (selectedCategory) {
+        setFormData({
+          ...formData,
+          category: selectedCategory,
+        });
+      }
     } else if (name === 'price') {
       setFormData({
         ...formData,
@@ -69,13 +83,6 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     }
   };
 
-  const addImageField = () => {
-    setFormData({
-      ...formData,
-      images: [...formData.images, ''],
-    });
-  };
-
   const removeImageField = (index: number) => {
     const newImages = [...formData.images];
     newImages.splice(index, 1);
@@ -85,34 +92,64 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     });
   };
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+const validateForm = () => {
+  const newErrors: Record<string, string> = {};
 
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
-    } else if (formData.title.length > 100) {
-      newErrors.title = 'Title must be less than 100 characters';
+  // Title Validation
+  if (!formData.title.trim()) {
+    newErrors.title = 'Title is required';
+  } else if (formData.title.length > 100) {
+    newErrors.title = 'Title must be less than 100 characters';
+  }
+
+  // Price Validation
+  if (formData.price <= 0) {
+    newErrors.price = 'Price must be greater than 0';
+  }
+
+  // Description Validation
+  if (!formData.description.trim()) {
+    newErrors.description = 'Description is required';
+  }
+
+  // Image Validation
+  const allowedImageDomains = [
+    'i.imgur.com',
+    'placehold.co',
+    'source.boomplaymusic.com',
+    'deadline.com',
+    'encrypted-tbn0.gstatic.com',
+    't3.ftcdn.net',
+    'api.escuelajs.co',
+  ];
+
+  if (formData.images.length === 0 || formData.images.some((img) => !img.trim())) {
+    newErrors.images = 'Image URL is required';
+  } else {
+    const invalidImage = formData.images.find((url) => {
+      try {
+        const domain = new URL(url).hostname;
+        return !allowedImageDomains.includes(domain);
+      } catch {
+        return true; // Malformed URL
+      }
+    });
+
+    if (invalidImage) {
+      newErrors.images =
+        'One or more image URLs are invalid or not from an allowed domain.';
     }
+  }
 
-    if (formData.price <= 0) {
-      newErrors.price = 'Price must be greater than 0';
-    }
+  // Set and return errors
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
-    }
-
-    if (formData.images.some(img => !img.trim())) {
-      newErrors.images = 'Image URL is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
@@ -121,7 +158,15 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       if (initialData) {
         await dispatch(updateExistingProduct({ ...formData, id: initialData.id })).unwrap();
       } else {
-        await dispatch(addNewProduct(formData)).unwrap();
+        await dispatch(
+          addNewProduct({
+            title: formData.title,
+            price: formData.price,
+            description: formData.description,
+            categoryId: formData.category.id,
+            images: formData.images,
+          })
+        ).unwrap();
       }
       router.push('/assignment-2');
     } catch (error) {
@@ -136,7 +181,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       <h1 className="text-2xl font-bold mb-6">
         {initialData ? 'Edit Product' : 'Add New Product'}
       </h1>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">
@@ -148,7 +193,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             name="title"
             value={formData.title}
             onChange={handleChange}
-            className={`mt-1 block w-full px-3 py-2 border ${errors.title ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+            className={`mt-1 block w-full px-3 py-2 border ${
+              errors.title ? 'border-red-500' : 'border-gray-300'
+            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
           />
           {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
         </div>
@@ -165,7 +212,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             step="0.01"
             value={formData.price}
             onChange={handleChange}
-            className={`mt-1 block w-full px-3 py-2 border ${errors.price ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+            className={`mt-1 block w-full px-3 py-2 border ${
+              errors.price ? 'border-red-500' : 'border-gray-300'
+            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
           />
           {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
         </div>
@@ -180,7 +229,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             rows={4}
             value={formData.description}
             onChange={handleChange}
-            className={`mt-1 block w-full px-3 py-2 border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+            className={`mt-1 block w-full px-3 py-2 border ${
+              errors.description ? 'border-red-500' : 'border-gray-300'
+            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
           />
           {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
         </div>
@@ -192,13 +243,13 @@ export default function ProductForm({ initialData }: ProductFormProps) {
           <select
             id="category"
             name="category"
-            value={formData.category.name}
+            value={formData.category.id}
             onChange={handleChange}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
             {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
+              <option key={category.id} value={category.id}>
+                {category.name}
               </option>
             ))}
           </select>
@@ -213,7 +264,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                 name={`images[${index}]`}
                 value={image}
                 onChange={handleChange}
-                className={`flex-1 px-3 py-2 border ${errors.images ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                className={`flex-1 px-3 py-2 border ${
+                  errors.images ? 'border-red-500' : 'border-gray-300'
+                } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                 placeholder="Image URL"
               />
               {formData.images.length > 1 && (
@@ -228,13 +281,6 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             </div>
           ))}
           {errors.images && <p className="mt-1 text-sm text-red-600">{errors.images}</p>}
-          <button
-            type="button"
-            onClick={addImageField}
-            className="mt-2 px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-          >
-            Add Another Image
-          </button>
         </div>
 
         <div className="flex justify-end space-x-3 pt-4">
@@ -248,7 +294,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`px-4 py-2 text-white rounded-md ${isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+            className={`px-4 py-2 text-white rounded-md ${
+              isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
             {isSubmitting ? 'Saving...' : 'Save Product'}
           </button>
